@@ -4,76 +4,74 @@ import { Book } from "../models/bookModel.js";
 // saving book to database
 export const createBook = async (req, res) => {
   try {
+    if (!req.body.title || !req.body.author || !req.body.publishyear) {
+      return res.status(400).send({ message: "Fill all required fields" });
+    } else {
       const newBook = {
         title: req.body.title,
         author: req.body.author,
-        publishYear: req.body.publishYear,
+        publishyear: req.body.publishyear
       };
-      const book = await Book.create(newBook);
-      return res.status(201).send(book);
-   
+      const aBook = await Book.create(newBook);
+      return res.status(201).send(aBook); // 201 Created
+    }
   } catch (error) {
     console.log(error.message);
-    res.status(500).send({ message: error.message });
+    return res.status(500).send({ message: error.message });
   }
 };
-
-//   Get All Books from database
 
 export const getAllBooks = async (req, res) => {
   try {
-    const books = await Book.find({});
-    res.status(200).send(books);
-  } catch {
+    const books = await Book.find();
+    return res.status(200).send(books); // 200 OK
+  } catch (error) {
     console.log(error.message);
-    res.status(500).send({ message: error.message });
+    return res.status(500).send({ message: error.message });
   }
 };
 
-//   get one book
-
-export const getOneBook = async (req, res) => {
+export const getById = async (req, res) => {
   try {
     const id = req.params.id;
-    const books = await Book.findById(id);
-    res.status(200).send(books);
-  } catch {
-    console.log(error.message);
-    res.status(500).send({ message: error.message });
-  }
-};
-
-//   Update a Book
-export const updateBook = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const result = await Book.findByIdAndUpdate(id, req.body);
-    if (!result) {
-      res.status(404).send({ message: "Book not found" });
-    } else {
-      res.status(200).send({ message: "Book updated successfully" });
+    const book = await Book.findById(id);
+    if (!book) {
+      return res.status(404).send({ message: "Book not found" });
     }
-  } catch {
+    return res.status(200).send(book); // 200 OK
+  } catch (error) {
     console.log(error.message);
-    res.status(500).send({ message: error.message });
+    return res.status(500).send({ message: error.message });
   }
 };
 
-//   Delete a Book
-
-export const deleteBook = async (req, res) => {
+export const updateOne = async (req, res) => {
   try {
     const id = req.params.id;
-    const result = await Book.findByIdAndDelete(id);
-    console.log(result + "resultttttt");
-    if (!result) {
-      res.status(404).send({ message: "Book not found" });
+    const book = await Book.findByIdAndUpdate(id, req.body, { new: true });
+    if (!book) {
+      return res.status(404).send({ message: "Book not found" });
     } else {
-      console.log("hiiiii");
-      res.status(200).send({ message: "Book Deleted successfully" });
+      return res.status(200).send({ message: "Book updated successfully", book }); // 200 OK
     }
   } catch (error) {
     console.log(error.message);
-    res.status(500).send({ message: error.message });
+    return res.status(500).send({ message: error.message });
   }
 };
+
+export const deleteOne = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const book = await Book.findByIdAndDelete(id);
+    if (!book) {
+      return res.status(404).send({ message: "Book not found" });
+    } else {
+      return res.status(200).send({ message: "Book deleted successfully" }); // 200 OK
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).send({ message: error.message });
+  }
+};
+
